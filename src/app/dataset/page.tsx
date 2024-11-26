@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { v4 as uuidv4 } from 'uuid'; // Import UUID for unique IDs
+import { v4 as uuidv4 } from 'uuid';
 
 const Page = () => {
   const [datasets, setDatasets] = useState([]);
@@ -27,6 +27,21 @@ const Page = () => {
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
     setDatasets(sortedDatasets);
+
+    // Close sidebar when clicking outside
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setSelectedDataset(null); // Close sidebar
+      }
+    };
+
+    // Attach event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Clean up event listener on unmount
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const indexOfLastDataset = currentPage * datasetsPerPage;
@@ -95,7 +110,7 @@ const Page = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto flex">
       <div className="flex-1">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-semibold text-black">Datasets</h1>
@@ -106,9 +121,9 @@ const Page = () => {
             + New Dataset
           </button>
         </div>
-  
+
         <p className="text-l text-black">Recent Datasets:</p>
-  
+
         {datasets.length === 0 ? (
           <div className="flex justify-center items-center h-96">
             <p className="text-lg text-gray-500">No dataset created yet.</p>
@@ -150,88 +165,113 @@ const Page = () => {
             ))}
           </div>
         )}
-      </div>
-  
-      {/* Pagination Controls */}
-      <div className="flex justify-between mt-4 pt-4 border-t border-gray-300">
-        <button
-          onClick={prevPage}
-          disabled={currentPage === 1}
-          className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
-        >
-          Previous
-        </button>
-        <span className="self-center">{`Page ${currentPage} of ${totalPages}`}</span>
-        <button
-          onClick={nextPage}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
-        >
-          Next
-        </button>
-      </div>
-  
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white w-1/2 max-h-[90vh] overflow-y-auto p-8 shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-black">Create New Dataset</h2>
-            <input
-              type="text"
-              name="title"
-              value={newDataset.name}
-              onChange={(e) => setNewDataset({ ...newDataset, name: e.target.value })}
-              className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
-              placeholder="Enter dataset title"
-            />
-            <select
-              name="type"
-              value={newDataset.type}
-              onChange={(e) => setNewDataset({ ...newDataset, type: e.target.value })}
-              className="border border-gray-300 p-2 w-full mb-4 rounded"
-            >
-              <option value="user-private-dataset">User Private Dataset</option>
-              <option value="public-dataset">Public Dataset</option>
-            </select>
-            <input
-              type="text"
-              name="datasetType"
-              value={newDataset.datasetType || ""}
-              onChange={(e) => setNewDataset({ ...newDataset, datasetType: e.target.value })}
-              className="border border-gray-300 p-2 w-full mb-4 rounded"
-              placeholder="Enter type of dataset (e.g., Images, Documents)"
-            />
-            <label className="block mb-2 text-sm font-medium text-gray-700">Upload Images</label>
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) =>
-                setNewDataset({ ...newDataset, file: Array.from(e.target.files) })
-              }
-              className="border border-gray-300 p-2 w-full mb-4 rounded"
-            />
-            <input
-              type="text"
-              name="link"
-              value={newDataset.link}
-              onChange={(e) => setNewDataset({ ...newDataset, link: e.target.value })}
-              className="border border-gray-300 p-2 w-full mb-4 rounded"
-              placeholder="Enter link to dataset"
-            />
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+
+        {/* Pagination Controls */}
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 1}
+            className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+          >
+            Previous
+          </button>
+          <span className="self-center">{`Page ${currentPage} of ${totalPages}`}</span>
+          <button
+            onClick={nextPage}
+            disabled={currentPage === totalPages}
+            className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+          >
+            Next
+          </button>
+        </div>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white w-1/2 max-h-[90vh] overflow-y-auto p-8 shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Create New Dataset</h2>
+              <input
+                type="text"
+                name="title"
+                value={newDataset.name}
+                onChange={(e) => setNewDataset({ ...newDataset, name: e.target.value })}
+                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                placeholder="Enter dataset title"
+              />
+              <select
+                name="type"
+                value={newDataset.type}
+                onChange={(e) => setNewDataset({ ...newDataset, type: e.target.value })}
+                className="border border-gray-300 p-2 w-full mb-4 rounded"
               >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveDataset}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-              >
-                Save Dataset
-              </button>
+                <option value="user-private-dataset">User Private Dataset</option>
+                <option value="public-dataset">Public Dataset</option>
+              </select>
+              <input
+                type="text"
+                name="datasetType"
+                value={newDataset.datasetType || ""}
+                onChange={(e) => setNewDataset({ ...newDataset, datasetType: e.target.value })}
+                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                placeholder="Enter type of dataset (e.g., Images, Documents)"
+              />
+              <label className="block mb-2 text-sm font-medium text-gray-700">Upload Images</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) =>
+                  setNewDataset({ ...newDataset, file: Array.from(e.target.files) })
+                }
+                className="border border-gray-300 p-2 w-full mb-4 rounded"
+              />
+              <input
+                type="text"
+                name="link"
+                value={newDataset.link || ""}
+                onChange={(e) => setNewDataset({ ...newDataset, link: e.target.value })}
+                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                placeholder="Dataset link"
+              />
+              <div className="flex justify-between mt-6">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveDataset}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                >
+                  Save Dataset
+                </button>
+              </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Left Sidebar (navigation) */}
+      {selectedDataset && (
+        <div
+          ref={sidebarRef}
+          className="w-1/4 bg-gray-100 p-4 h-screen fixed left-0 top-0 z-10"
+        >
+          {/* Navigation tabs: View & Information */}
+          <div className="flex flex-col mb-4">
+            <Link
+              href={{
+                pathname: "/view",  // Ensure this matches the actual page name
+                query: { datasetId: selectedDataset.id.toString() }, // Pass as string if necessary
+              }}
+            >
+              <button
+                className={`py-2 px-4 mb-2 ${activeTab === "view" ? "bg-blue-500 text-white" : "bg-gray-300"}`}
+                onClick={() => setActiveTab("view")}
+              >
+                View
+              </button>
+            </Link>
           </div>
         </div>
       )}
