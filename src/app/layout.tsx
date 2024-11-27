@@ -60,10 +60,10 @@ export default function RootLayout({
                 Datasets
               </Link>
               <Link
-                href="/buckets"
+                href="/guide"
                 className="text-black dark:text-white font-medium hover:underline"
               >
-                Buckets
+                Guide
               </Link>
             </div>
 

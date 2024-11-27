@@ -58,7 +58,7 @@ const ViewDataset = () => {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-4">{dataset?.name}</h1>
+      <h1 className="text-3xl font-semibold mb-4 text-gray-600">{dataset?.name} images:</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentImages.length > 0 ? (
           currentImages.map((url, index) => (
@@ -74,26 +74,28 @@ const ViewDataset = () => {
           <p>No images found in this dataset.</p>
         )}
       </div>
-
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-          className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
-        >
-          Next
-        </button>
-      </div>
+      
+      {imageUrls.length > itemsPerPage && (
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

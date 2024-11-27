@@ -105,36 +105,36 @@ const Page = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-1/2 h-auto p-8 shadow-lg overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">Create New Project</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">Create New Project</h2>
             <div>
-              <label className="block mb-2">Project Name:</label>
+              <label className="block mb-2 text-black">Project Name:</label>
               <input
                 type="text"
                 name="name"
                 value={newProject.name}
                 onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
                 placeholder="Enter project name"
               />
             </div>
             <div>
-              <label className="block mb-2">Project Description:</label>
+              <label className="block mb-2 text-black">Project Description:</label>
               <input
                 type="text"
                 name="description"
                 value={newProject.description}
                 onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
                 placeholder="Enter project description"
               />
             </div>
             <div>
-              <label className="block mb-2">Project Type:</label>
+              <label className="block mb-2 text-black">Project Type:</label>
               <select
                 name="project_type"
                 value={newProject.project_type}
                 onChange={handleInputChange}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
               >
                 <option value="IMAGE_CLASSIFICATION">Image Classification</option>
                 <option value="TEXT_CLASSIFICATION">Text Classification</option>

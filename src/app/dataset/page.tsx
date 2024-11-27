@@ -18,6 +18,7 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState("view");
   const [currentPage, setCurrentPage] = useState(1);
   const [datasetsPerPage] = useState(6); // Number of datasets per page
+  const [sidebarPosition, setSidebarPosition] = useState({ top: 0, left: 0 }); // State for sidebar position
   const sidebarRef = useRef(null);
 
   useEffect(() => {
@@ -49,8 +50,16 @@ const Page = () => {
   const currentDatasets = datasets.slice(indexOfFirstDataset, indexOfLastDataset);
   const totalPages = Math.ceil(datasets.length / datasetsPerPage);
 
-  const handleSelectDataset = (dataset) => {
+  const handleSelectDataset = (event, dataset) => {
     setSelectedDataset(dataset);
+    // Get the dataset element to calculate its center position
+    const datasetElement = event.currentTarget;
+    const rect = datasetElement.getBoundingClientRect();
+    const sidebarPosition = {
+      top: rect.top + window.scrollY + rect.height / 2, // Center vertically
+      left: rect.left + window.scrollX + rect.width / 2, // Center horizontally
+    };
+    setSidebarPosition(sidebarPosition);
   };
 
   const openModal = () => {
@@ -134,7 +143,7 @@ const Page = () => {
               <div
                 key={dataset.id}
                 className="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow flex flex-col cursor-pointer"
-                onClick={() => handleSelectDataset(dataset)}
+                onClick={(event) => handleSelectDataset(event, dataset)}
               >
                 <div className="flex items-center justify-center h-32 bg-gray-100 rounded-md mb-4">
                   <img
@@ -144,7 +153,7 @@ const Page = () => {
                   />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold">{dataset.name}</h2>
+                  <h2 className="text-lg font-semibold text-gray-700">{dataset.name}</h2>
                   <p className="text-sm text-gray-500">
                     Created: {new Date(dataset.createdAt).toLocaleString()}
                   </p>
@@ -167,54 +176,48 @@ const Page = () => {
         )}
 
         {/* Pagination Controls */}
-        <div className="flex justify-between mt-4">
-          <button
-            onClick={prevPage}
-            disabled={currentPage === 1}
-            className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
-          >
-            Previous
-          </button>
-          <span className="self-center">{`Page ${currentPage} of ${totalPages}`}</span>
-          <button
-            onClick={nextPage}
-            disabled={currentPage === totalPages}
-            className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
-          >
-            Next
-          </button>
-        </div>
+        {datasets.length > datasetsPerPage && (
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+            >
+              Previous
+            </button>
+            <span className="self-center">{`Page ${currentPage} of ${totalPages}`}</span>
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className="bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {isModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white w-1/2 max-h-[90vh] overflow-y-auto p-8 shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">Create New Dataset</h2>
+            <div className="bg-white w-1/2 max-h-[90vh] overflow-y-auto p-8 shadow-lg rounded-lg">
+              <h2 className="text-xl font-semibold mb-4 text-black">Create New Dataset</h2>
               <input
                 type="text"
                 name="title"
                 value={newDataset.name}
                 onChange={(e) => setNewDataset({ ...newDataset, name: e.target.value })}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
                 placeholder="Enter dataset title"
               />
               <select
                 name="type"
                 value={newDataset.type}
                 onChange={(e) => setNewDataset({ ...newDataset, type: e.target.value })}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
               >
                 <option value="user-private-dataset">User Private Dataset</option>
                 <option value="public-dataset">Public Dataset</option>
               </select>
-              <input
-                type="text"
-                name="datasetType"
-                value={newDataset.datasetType || ""}
-                onChange={(e) => setNewDataset({ ...newDataset, datasetType: e.target.value })}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
-                placeholder="Enter type of dataset (e.g., Images, Documents)"
-              />
-              <label className="block mb-2 text-sm font-medium text-gray-700">Upload Images</label>
+              <label className="block mb-3 text-sm font-medium text-gray-900">Choose Images</label>
               <input
                 type="file"
                 multiple
@@ -229,7 +232,7 @@ const Page = () => {
                 name="link"
                 value={newDataset.link || ""}
                 onChange={(e) => setNewDataset({ ...newDataset, link: e.target.value })}
-                className="border border-gray-300 p-2 w-full mb-4 rounded"
+                className="border border-gray-300 p-2 w-full mb-4 rounded text-black"
                 placeholder="Dataset link"
               />
               <div className="flex justify-between mt-6">
@@ -251,22 +254,30 @@ const Page = () => {
         )}
       </div>
 
-      {/* Left Sidebar (navigation) */}
+      {/* Navigation Button */}
       {selectedDataset && (
         <div
           ref={sidebarRef}
-          className="w-1/4 bg-gray-100 p-4 h-screen fixed left-0 top-0 z-10"
+          className="absolute bg-white border border-gray-300 p-4 rounded shadow-lg"
+          style={{
+            top: `${sidebarPosition.top}px`, // Use the new position
+            left: `${sidebarPosition.left}px`,  // Use the new position
+            transform: "translate(-50%, -50%)", // Center the sidebar
+            zIndex: 1000, // Ensure it appears above other elements
+          }}
         >
-          {/* Navigation tabs: View & Information */}
-          <div className="flex flex-col mb-4">
+          {/* Navigation Tabs */}
+          <div className="flex flex-col">
             <Link
               href={{
-                pathname: "/view",  // Ensure this matches the actual page name
-                query: { datasetId: selectedDataset.id.toString() }, // Pass as string if necessary
+                pathname: "/view", // Adjust to the actual route
+                query: { datasetId: selectedDataset.id.toString() },
               }}
             >
               <button
-                className={`py-2 px-4 mb-2 ${activeTab === "view" ? "bg-blue-500 text-white" : "bg-gray-300"}`}
+                className={`py-2 px-4 rounded-lg transition duration-200 ${
+                  activeTab === "view" ? "bg-blue-500 text-white" : "bg-gray-300 text-black"
+                } hover:bg-blue-600`}
                 onClick={() => setActiveTab("view")}
               >
                 View
